@@ -42,7 +42,7 @@ wstring message_decrypt(wstring message, wstring key) {
 }
 
 int main() {
-    setlocale(LC_ALL, "ru_RU.UTF-8");
+    setlocale(LC_ALL, "Russian");
 
     for(int i = 0; i < n; i++) {
         reverse_alphabet[alphabet[i]] = i;
@@ -55,6 +55,6 @@ int main() {
 
     wcout << message_encrypt(message, key) << endl;
     wcout << message_decrypt(message_encrypt(message, key), key) << endl;
-
+    
     return 0;
 }

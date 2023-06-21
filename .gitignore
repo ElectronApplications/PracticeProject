@@ -1,3 +1,6 @@
 .vscode
 program
-program.exe
+*.exe
+*.o
+Makefile.win
+Project.layout
