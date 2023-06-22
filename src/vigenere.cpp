@@ -7,7 +7,7 @@
 
 #include "vigenere.h"
 
-const vector<char32_t> full_dict = {' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+const vector<char32_t> full_dict = {'!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                         ':', ';', '<', '=', '>', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                         'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                         'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', U'А', U'Б', U'В', U'Г', U'Д', U'Е', U'Ё', U'Ж', U'З',
@@ -57,11 +57,20 @@ string message_encrypt(string message, string key, Dictionary &dict) {
         char32_t msgc = message32[i];
         char32_t keyc = key32[index % key32.length()];
 
-        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end() || dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
-            if(msgc != ' ' && msgc != '\n')
+        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end()) {
+            if(msgc > ' ')
                 throw invalid_argument("Ошибка! В тексте присутствуют символы, которых нет в выбранном алфавите!");
             else {
                 result += msgc;
+                continue;
+            }
+        }
+        else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
+            if(keyc > ' ')
+                throw invalid_argument("Ошибка! В ключе присутствуют символы, которых нет в выбранном алфавите!");
+            else {
+                index++;
+                i--;
                 continue;
             }
         }
@@ -87,11 +96,20 @@ string message_decrypt(string message, string key, Dictionary &dict) {
         char32_t msgc = message32[i];
         char32_t keyc = key32[index % key32.length()];
 
-        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end() || dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
-            if(msgc != ' ' && msgc != '\n')
+        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end()) {
+            if(msgc > ' ')
                 throw invalid_argument("Ошибка! В тексте присутствуют символы, которых нет в выбранном алфавите!");
             else {
                 result += msgc;
+                continue;
+            }
+        }
+        else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
+            if(keyc > ' ')
+                throw invalid_argument("Ошибка! В ключе присутствуют символы, которых нет в выбранном алфавите!");
+            else {
+                index++;
+                i--;
                 continue;
             }
         }
