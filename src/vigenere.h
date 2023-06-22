@@ -11,7 +11,7 @@ struct Dictionary {
     std::map<char32_t, int> reverse_dict;
     int n;
 
-    Dictionary(std::vector<char32_t> dict);
+    Dictionary(std::vector<char32_t> dict, int repeat);
 };
 
 extern Dictionary full_dictionary;
