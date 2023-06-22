@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
-#include <map>
-#include <codecvt>
-#include <locale>
+#include <stdexcept>
+
+#include "vigenere.h"
 
 #ifdef _WIN32
 #include "windows.h"
@@ -10,55 +10,7 @@
 
 using namespace std;
 
-const char32_t dictionary[] = {' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                        ':', ';', '<', '=', '>', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', U'А', U'Б', U'В', U'Г', U'Д', U'Е', U'Ё', U'Ж', U'З',
-                        U'И', U'Й', U'К', U'Л', U'М', U'Н', U'О', U'П', U'Р', U'С', U'Т', U'У', U'Ф', U'Х', U'Ц', U'Ч', U'Ш', U'Щ', U'Ъ', U'Ы', U'Ь', U'Э',
-                        U'Ю', U'Я', U'а', U'б', U'в', U'г', U'д', U'е', U'ё', U'ж', U'з', U'и', U'й', U'к', U'л', U'м', U'н', U'о', U'п', U'р', U'с', U'т', U'у',
-                        U'ф', U'х', U'ц', U'ч', U'ш', U'щ', U'ъ', U'ы', U'ь', U'э', U'ю', U'я'};
-map<char32_t, int> reverse_dictionary;
-const int n = sizeof(dictionary) / sizeof(char32_t);
-
-int symbol_encrypt(int symbol, int key) {
-    return ((symbol + key) % n + n) % n;
-}
-
-int symbol_decrypt(int symbol, int key) {
-    return ((symbol - key) % n + n) % n;
-}
-
-string message_encrypt(string message, string key) {
-    wstring_convert<codecvt_utf8<char32_t>, char32_t> convert;
-
-    u32string message32 = convert.from_bytes(message);
-    u32string key32 = convert.from_bytes(key);
-    u32string result = U"";
-
-    for(int i = 0; i < message32.length(); i++) {
-        int symbol = reverse_dictionary[message32[i]];
-        int key_symbol = reverse_dictionary[key32[i % key32.length()]];
-        result += dictionary[symbol_encrypt(symbol, key_symbol)];
-    }
-    return convert.to_bytes(result);
-}
-
-string message_decrypt(string message, string key) {
-    wstring_convert<codecvt_utf8<char32_t>, char32_t> convert;
-
-    u32string message32 = convert.from_bytes(message);
-    u32string key32 = convert.from_bytes(key);
-    u32string result = U"";
-    for(int i = 0; i < message32.length(); i++) {
-        int symbol = reverse_dictionary[message32[i]];
-        int key_symbol = reverse_dictionary[key32[i % key32.length()]];
-        result += dictionary[symbol_decrypt(symbol, key_symbol)];
-    }
-    return convert.to_bytes(result);
-}
-
 string console_input() {
-    cin.ignore();
     string input;
 
     #ifndef _WIN32
@@ -89,18 +41,34 @@ string console_input() {
     #endif
 }
 
+Dictionary &choose_dict() {
+    cout << "Выберите используемый алфавит:" << endl;
+    cout << "1) Полный алфавит - содержит строчные и прописные буквы русского и английского алфавитов, цифры и специальные символы" << endl;
+    cout << "2) Русский алфавит - содержит только прописные буквы русского алфавита" << endl;
+    cout << "3) Английский алфавит - содержит только прописные буквы английского алфавита" << endl;
+    
+    int input;
+    cin >> input;
+
+    switch(input) {
+        default: case 1:
+            return full_dictionary;
+        case 2:
+            return ru_dictionary;
+        case 3:
+            return en_dictionary;
+    }
+}
+
 int main() {
     setlocale(LC_ALL, "ru_RU.UTF-8");
     #ifdef _WIN32
         SetConsoleOutputCP(65001);
     #endif
 
-    for(int i = 0; i < n; i++) {
-        reverse_dictionary[dictionary[i]] = i;
-    }
-
-    int input = 1;
+    int input;
     do {
+        cout << "=====================" << endl;
         cout << "Введите действие:" << endl;
         cout << "1) Зашифровать строку" << endl;
         cout << "2) Расшифровать строку" << endl;
@@ -109,23 +77,39 @@ int main() {
         
         switch(input) {
             case 1: {
+                Dictionary &dict = choose_dict();
+
                 string message, key;
+                cin.ignore();
                 cout << "Введите строку, которую нужно зашифровать: " << endl;
                 message = console_input();
                 cout << "Введите ключ, при помощи которого вы хотите зашифровать введенную строку: " << endl;
                 key = console_input();
-        
-                cout << "Зашифрованная строка: \"" << message_encrypt(message, key) << "\"" << endl;
+
+                try {
+                    cout << "Зашифрованная строка: \"" << message_encrypt(message, key, dict) << "\"" << endl;
+                }
+                catch(const invalid_argument &e) {
+                    cout << e.what() << endl;
+                }
                 break;
             }
             case 2: {
+                Dictionary &dict = choose_dict();
+
                 string message, key;
+                cin.ignore();
                 cout << "Введите строку, которую нужно расшифровать: " << endl;
                 message = console_input();
                 cout << "Введите ключ, при помощи которого данная строка была зашифрована: " << endl;
                 key = console_input();
 
-                cout << "Расшифрованная строка: \"" << message_decrypt(message, key) << "\"" << endl;
+                try {
+                    cout << "Расшифрованная строка: \"" << message_decrypt(message, key, dict) << "\"" << endl;
+                }
+                catch(const invalid_argument &e) {
+                    cout << e.what() << endl;
+                }
                 break;
             }
         }
