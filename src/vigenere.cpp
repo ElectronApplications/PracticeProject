@@ -47,35 +47,52 @@ int symbol_decrypt(int symbol, int key, int n) {
     return ((symbol - key) % n + n) % n;
 }
 
+// Функция для проверки строки
+void validate_message(u32string message, Dictionary &dict) {
+    for(char32_t i : message) {
+        if(dict.reverse_dict.find(i) == dict.reverse_dict.end() && i > ' ')
+            throw invalid_argument("Ошибка! В тексте присутствуют символы, которых нет в выбранном алфавите!");
+    }
+}
+
+// Функция для проверки ключа
+void validate_key(u32string key, Dictionary &dict) {
+    int actual_symbols = 0;
+    for(char32_t i : key) {
+        if(dict.reverse_dict.find(i) != dict.reverse_dict.end())
+            actual_symbols++;
+        else if(i > ' ')
+            throw invalid_argument("Ошибка! В ключе присутствуют символы, которых нет в выбранном алфавите!");
+    }
+
+    if(actual_symbols == 0)
+        throw invalid_argument("Ошибка! В ключе отсутствуют символы из алфавита!");
+}
+
 // Функция шифровки строки
 string message_encrypt(string message, string key, Dictionary &dict) {
     wstring_convert<codecvt_utf8<char32_t>, char32_t> convert;
 
     u32string message32 = convert.from_bytes(message); // Переводим строку в UTF-32, чтобы иметь возможность считывать отдельные юникод символы
     u32string key32 = convert.from_bytes(key); // Переводим ключ в UTF-32
-    u32string result = U"";
 
+    validate_message(message32, dict);
+    validate_key(key32, dict);
+
+    u32string result = U"";
     int index = 0; // Номер текущего символа ключа
     for(int i = 0; i < message32.length(); i++) {
         char32_t msgc = message32[i];
         char32_t keyc = key32[index % key32.length()];
 
-        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end()) {
-            if(msgc > ' ')
-                throw invalid_argument("Ошибка! В тексте присутствуют символы, которых нет в выбранном алфавите!");
-            else {
-                result += msgc;
-                continue; // Игнорируем спец. символы в строке
-            }
+        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end() && msgc <= ' ') {
+            result += msgc;
+            continue; // Игнорируем спец. символы в строке
         }
-        else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
-            if(keyc > ' ')
-                throw invalid_argument("Ошибка! В ключе присутствуют символы, которых нет в выбранном алфавите!");
-            else {
-                index++;
-                i--;
-                continue; // Игнорируем спец. символы в ключе
-            }
+        else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end() && keyc <= ' ') {
+            index++;
+            i--;
+            continue; // Игнорируем спец. символы в ключе
         }
 
         int symbol = dict.reverse_dict[msgc];
@@ -93,29 +110,24 @@ string message_decrypt(string message, string key, Dictionary &dict) {
 
     u32string message32 = convert.from_bytes(message); // Переводим строку в UTF-32, чтобы иметь возможность считывать отдельные юникод символы
     u32string key32 = convert.from_bytes(key); // Переводим ключ в UTF-32
-    u32string result = U"";
 
+    validate_message(message32, dict);
+    validate_key(key32, dict);
+
+    u32string result = U"";
     int index = 0; // Номер текущего символа ключа
     for(int i = 0; i < message32.length(); i++) {
         char32_t msgc = message32[i];
         char32_t keyc = key32[index % key32.length()];
 
-        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end()) {
-            if(msgc > ' ')
-                throw invalid_argument("Ошибка! В тексте присутствуют символы, которых нет в выбранном алфавите!");
-            else {
-                result += msgc;
-                continue; // Игнорируем спец. символы в строке
-            }
+        if(dict.reverse_dict.find(msgc) == dict.reverse_dict.end() && msgc <= ' ') {
+            result += msgc;
+            continue; // Игнорируем спец. символы в строке
         }
-        else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
-            if(keyc > ' ')
-                throw invalid_argument("Ошибка! В ключе присутствуют символы, которых нет в выбранном алфавите!");
-            else {
-                index++;
-                i--;
-                continue; // Игнорируем спец. символы в ключе
-            }
+        else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end() && keyc <= ' ') {
+            index++;
+            i--;
+            continue; // Игнорируем спец. символы в ключе
         }
 
         int symbol = dict.reverse_dict[msgc];
