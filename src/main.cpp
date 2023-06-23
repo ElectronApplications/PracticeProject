@@ -11,18 +11,19 @@
 
 using namespace std;
 
+// Функция для чтения строки из консоли в кодировке UTF-8
 string console_input() {
     string input;
 
     #ifndef _WIN32
-        getline(cin, input);
+        getline(cin, input); // Под *nix системами сразу читаем строку в кодировке utf-8
         return input;
     #else
         SetConsoleOutputCP(866);
-        getline(cin, input);
+        getline(cin, input); // Под windows читаем строку в кодировке cp866
         SetConsoleOutputCP(65001);
         string result;
-        for(char i : input) {
+        for(char i : input) { // Каждый символ русского алфавита в строке переводим в utf-8
             if(i >= '\x80' && i <= '\xAF') {
                 result += '\xd0';
                 result += ('\x90' + (i - '\x80'));
@@ -130,6 +131,11 @@ void crypt_file(string input_path, string output_path, string key, bool encrypt,
 
     ofstream output_file(output_path, ios::trunc);
     output_file << output;
+
+    if(encrypt)
+        cout << "Содержимое файла " << input_path << " было успешно зашифровано и записано в файл " << output_path << endl;
+    else
+        cout << "Содержимое файла " << input_path << " было успешно расшифровано и записано в файл " << output_path << endl;
 }
 
 void help(char *program_name) {
@@ -146,7 +152,7 @@ void help(char *program_name) {
 int main(int argc, char **argv) {
     setlocale(LC_ALL, "ru_RU.UTF-8");
     #ifdef _WIN32
-        SetConsoleOutputCP(65001);
+        SetConsoleOutputCP(65001); // Используем кодировку utf-8 для вывода в консоль
     #endif
 
     if(argc >= 2 && string(argv[1]) == "-i")

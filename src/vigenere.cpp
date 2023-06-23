@@ -37,22 +37,25 @@ Dictionary::Dictionary(vector<char32_t> dict, int repeat) {
     this->n = this->dict.size();
 }
 
+// Функция шифровки символа symbol ключом key при использовании алфавита с количеством символов n
 int symbol_encrypt(int symbol, int key, int n) {
     return ((symbol + key) % n + n) % n;
 }
 
+// Функция расшифровки символа symbol ключом key при использовании алфавита с количеством символов n
 int symbol_decrypt(int symbol, int key, int n) {
     return ((symbol - key) % n + n) % n;
 }
 
+// Функция шифровки строки
 string message_encrypt(string message, string key, Dictionary &dict) {
     wstring_convert<codecvt_utf8<char32_t>, char32_t> convert;
 
-    u32string message32 = convert.from_bytes(message);
-    u32string key32 = convert.from_bytes(key);
+    u32string message32 = convert.from_bytes(message); // Переводим строку в UTF-32, чтобы иметь возможность считывать отдельные юникод символы
+    u32string key32 = convert.from_bytes(key); // Переводим ключ в UTF-32
     u32string result = U"";
 
-    int index = 0;
+    int index = 0; // Номер текущего символа ключа
     for(int i = 0; i < message32.length(); i++) {
         char32_t msgc = message32[i];
         char32_t keyc = key32[index % key32.length()];
@@ -62,7 +65,7 @@ string message_encrypt(string message, string key, Dictionary &dict) {
                 throw invalid_argument("Ошибка! В тексте присутствуют символы, которых нет в выбранном алфавите!");
             else {
                 result += msgc;
-                continue;
+                continue; // Игнорируем спец. символы в строке
             }
         }
         else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
@@ -71,7 +74,7 @@ string message_encrypt(string message, string key, Dictionary &dict) {
             else {
                 index++;
                 i--;
-                continue;
+                continue; // Игнорируем спец. символы в ключе
             }
         }
 
@@ -84,14 +87,15 @@ string message_encrypt(string message, string key, Dictionary &dict) {
     return convert.to_bytes(result);
 }
 
+// Функция расшифровки строки
 string message_decrypt(string message, string key, Dictionary &dict) {
     wstring_convert<codecvt_utf8<char32_t>, char32_t> convert;
 
-    u32string message32 = convert.from_bytes(message);
-    u32string key32 = convert.from_bytes(key);
+    u32string message32 = convert.from_bytes(message); // Переводим строку в UTF-32, чтобы иметь возможность считывать отдельные юникод символы
+    u32string key32 = convert.from_bytes(key); // Переводим ключ в UTF-32
     u32string result = U"";
 
-    int index = 0;
+    int index = 0; // Номер текущего символа ключа
     for(int i = 0; i < message32.length(); i++) {
         char32_t msgc = message32[i];
         char32_t keyc = key32[index % key32.length()];
@@ -101,7 +105,7 @@ string message_decrypt(string message, string key, Dictionary &dict) {
                 throw invalid_argument("Ошибка! В тексте присутствуют символы, которых нет в выбранном алфавите!");
             else {
                 result += msgc;
-                continue;
+                continue; // Игнорируем спец. символы в строке
             }
         }
         else if(dict.reverse_dict.find(keyc) == dict.reverse_dict.end()) {
@@ -110,7 +114,7 @@ string message_decrypt(string message, string key, Dictionary &dict) {
             else {
                 index++;
                 i--;
-                continue;
+                continue; // Игнорируем спец. символы в ключе
             }
         }
 
