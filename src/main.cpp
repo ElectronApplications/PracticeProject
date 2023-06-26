@@ -174,19 +174,19 @@ int main(int argc, char **argv) {
             string input_path = argv[index];
             string key = argv[index + 1];
             string output_path = "output.txt";
-            Dictionary &dict = full_dictionary;
+            Dictionary *dict = &full_dictionary;
 
             if(argc >= 3 + index)
                 output_path = argv[index + 2];
             
             if(argc >= 4 + index) {
                 if(string(argv[3 + index]) == "ru")
-                    dict = ru_dictionary;
+                    dict = &ru_dictionary;
                 else if(string(argv[3 + index]) == "en")
-                    dict = en_dictionary;
+                    dict = &en_dictionary;
             }
             
-            crypt_file(input_path, output_path, key, encrypt, dict);
+            crypt_file(input_path, output_path, key, encrypt, *dict);
         }
         else
             help(argv[0]);
