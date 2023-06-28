@@ -115,6 +115,11 @@ void interactive() {
 
 void crypt_file(string input_path, string output_path, string key, bool encrypt, Dictionary &dict) {
     ifstream input_file(input_path);
+    if(!input_file) {
+        cerr << "При открытии входного файла произошла ошибка!" << endl;
+        exit(-1);
+    }
+
     string input((istreambuf_iterator<char>(input_file)), istreambuf_iterator<char>());
     
     string output;
@@ -130,6 +135,11 @@ void crypt_file(string input_path, string output_path, string key, bool encrypt,
     }
 
     ofstream output_file(output_path, ios::trunc);
+    if(!output_file) {
+        cerr << "При открытии выходного файла произошла ошибка!" << endl;
+        exit(-1);
+    }
+
     output_file << output;
 
     if(encrypt)
