@@ -28,7 +28,7 @@ Dictionary en_dictionary(en_dict, 2);
 
 Dictionary::Dictionary(vector<char32_t> dict, int repeat) {
     for(int i = 0; i < dict.size(); i++) {
-        this->reverse_dict[dict[i]] = i;
+        this->reverse_dict[dict[i]] = i % (dict.size() / repeat);
     }
 
     for(int i = 0; i < dict.size() / repeat; i++) {
